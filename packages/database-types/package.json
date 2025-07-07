@@ -5,6 +5,7 @@
   "main": "supabase.ts",
   "types": "supabase.ts",
   "scripts": {
+    "build": "echo 'No build needed for TypeScript definitions'",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
