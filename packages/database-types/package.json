@@ -1,0 +1,13 @@
+{
+  "name": "@smart-recipe/database-types",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "supabase.ts",
+  "types": "supabase.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}

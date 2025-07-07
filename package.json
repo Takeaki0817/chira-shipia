@@ -1,0 +1,60 @@
+{
+  "name": "smart-recipe",
+  "version": "1.0.0",
+  "description": "AI駆動型レシピ生成アプリ - 冷蔵庫の在庫とセール情報からパーソナライズされたレシピを提案",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "npm run dev --workspace=apps/frontend",
+    "dev:backend": "npm run dev --workspace=apps/backend",
+    "dev:db": "supabase start",
+    "build": "npm run build --workspaces",
+    "build:frontend": "npm run build --workspace=apps/frontend",
+    "build:backend": "npm run build --workspace=apps/backend",
+    "test": "npm run test --workspaces",
+    "test:unit": "npm run test:unit --workspaces",
+    "test:integration": "npm run test:integration --workspaces",
+    "test:e2e": "npm run test:e2e --workspaces",
+    "test:coverage": "npm run test:coverage --workspaces",
+    "test:watch": "npm run test:watch --workspaces",
+    "lint": "npm run lint --workspaces",
+    "lint:fix": "npm run lint:fix --workspaces",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "typecheck": "npm run typecheck --workspaces",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:migrate": "supabase db push",
+    "db:seed": "supabase db seed",
+    "db:studio": "supabase studio",
+    "db:types": "supabase gen types typescript --local > packages/database-types/supabase.ts",
+    "setup": "npm install && npm run db:start && npm run db:migrate && npm run db:seed",
+    "deploy:staging": "echo 'Deploy to staging'",
+    "deploy:production": "echo 'Deploy to production'"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "concurrently": "^8.2.2",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "keywords": [
+    "recipe",
+    "ai",
+    "ocr",
+    "supabase",
+    "react",
+    "typescript",
+    "gemini"
+  ],
+  "author": "SmartRecipe Team",
+  "license": "MIT"
+}
