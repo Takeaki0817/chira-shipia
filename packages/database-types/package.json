@@ -11,6 +11,7 @@
     "lint:fix": "echo 'No linting needed for TypeScript definitions'",
     "test": "echo 'No tests needed for TypeScript definitions'",
     "test:unit": "echo 'No tests needed for TypeScript definitions'",
+    "test:integration": "echo 'No integration tests needed for TypeScript definitions'",
     "test:watch": "echo 'No tests needed for TypeScript definitions'",
     "test:coverage": "echo 'No tests needed for TypeScript definitions'"
   },
