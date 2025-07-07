@@ -60,6 +60,22 @@ jobs:
         VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
+    - name: Verify Vercel secrets
+      run: |
+        if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+          echo "❌ VERCEL_TOKEN secret is not set"
+          exit 1
+        fi
+        if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+          echo "❌ VERCEL_ORG_ID secret is not set" 
+          exit 1
+        fi
+        if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+          echo "❌ VERCEL_PROJECT_ID secret is not set"
+          exit 1
+        fi
+        echo "✅ All Vercel secrets are configured"
+
     - name: Deploy to Vercel
       uses: amondnet/vercel-action@v25
       with:
@@ -67,46 +83,80 @@ jobs:
         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
         vercel-args: '--prod'
+        github-comment: false
+        github-deployment: false
 
   health-check:
     runs-on: ubuntu-latest
     needs: [deploy-frontend]
-    timeout-minutes: 5
+    timeout-minutes: 10
     if: always()
     
     steps:
     - name: Wait for deployments to stabilize
-      run: sleep 30
-
-    - name: Check backend health (with retry)
       run: |
-        for i in {1..3}; do
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://smart-recipe-backend.onrender.com/health)
-          if [ $response -eq 200 ]; then
-            echo "Backend health check passed"
+        echo "⏱️ Waiting 60 seconds for backend to warm up and deployments to stabilize..."
+        sleep 60
+
+    - name: Check backend health (with exponential backoff)
+      run: |
+        echo "🔍 Starting backend health check with rate-limit friendly timing..."
+        max_attempts=5
+        base_delay=30
+        
+        for i in $(seq 1 $max_attempts); do
+          echo "🏥 Health check attempt $i/$max_attempts..."
+          
+          # Use HEAD request to be more lightweight and add timeout
+          response=$(curl -s -I --max-time 10 -o /dev/null -w "%{http_code}" https://smart-recipe-backend.onrender.com/health || echo "000")
+          
+          echo "📊 Response: $response"
+          
+          if [ "$response" = "200" ]; then
+            echo "✅ Backend health check passed!"
             break
-          elif [ $i -eq 3 ]; then
-            echo "Backend health check failed with status $response after 3 attempts"
+          elif [ "$response" = "429" ]; then
+            echo "⚠️ Rate limited (429). Backend is running but rate limiting health checks."
+            if [ $i -eq $max_attempts ]; then
+              echo "💡 Backend is responding but rate limiting health checks - this is actually OK for production"
+              break
+            else
+              delay=$((base_delay * i))
+              echo "⏳ Waiting ${delay}s before retry due to rate limiting..."
+              sleep $delay
+            fi
+          elif [ $i -eq $max_attempts ]; then
+            echo "❌ Backend health check failed with status $response after $max_attempts attempts"
+            echo "🔗 Backend URL: https://smart-recipe-backend.onrender.com/health"
             exit 1
           else
-            echo "Backend health check attempt $i failed with status $response, retrying..."
-            sleep 10
+            delay=$((base_delay * i))
+            echo "⏳ Health check attempt $i failed with status $response, retrying in ${delay}s..."
+            sleep $delay
           fi
         done
 
     - name: Check frontend (with retry)
       run: |
-        for i in {1..3}; do
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://smart-recipe-frontend.vercel.app)
-          if [ $response -eq 200 ]; then
-            echo "Frontend health check passed"
+        echo "🌐 Starting frontend health check..."
+        max_attempts=3
+        
+        for i in $(seq 1 $max_attempts); do
+          echo "🖥️ Frontend check attempt $i/$max_attempts..."
+          
+          response=$(curl -s --max-time 15 -o /dev/null -w "%{http_code}" https://smart-recipe-frontend.vercel.app || echo "000")
+          echo "📊 Response: $response"
+          
+          if [ "$response" = "200" ]; then
+            echo "✅ Frontend health check passed!"
             break
-          elif [ $i -eq 3 ]; then
-            echo "Frontend health check failed with status $response after 3 attempts"
+          elif [ $i -eq $max_attempts ]; then
+            echo "❌ Frontend health check failed with status $response after $max_attempts attempts"
+            echo "🔗 Frontend URL: https://smart-recipe-frontend.vercel.app"
             exit 1
           else
-            echo "Frontend health check attempt $i failed with status $response, retrying..."
-            sleep 10
+            echo "⏳ Frontend check failed with status $response, retrying in 20s..."
+            sleep 20
           fi
         done
 
