@@ -26,10 +26,11 @@
 - Google Cloud Vision API (OCR)
 - Google Gemini 2.0 Flash (AI処理)
 
-### インフラ
-- Docker & Docker Compose
-- Vercel (フロントエンド)
-- Railway (バックエンド)
+### インフラ・デプロイメント
+- **フロントエンド**: Vercel (無料プラン)
+- **バックエンド**: Render (無料プラン)
+- **データベース**: Supabase (無料プラン)
+- **開発環境**: Docker & Docker Compose
 
 ## 📁 プロジェクト構造
 

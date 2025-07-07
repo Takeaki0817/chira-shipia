@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { supabase } from '../config/supabase.js'
-import { authenticateUser, AuthenticatedRequest } from '../middleware/auth.js'
+import { authenticateUser } from '../middleware/auth.js'
 
 const router = Router()
 
@@ -65,7 +65,7 @@ router.post('/signin', async (req, res, next) => {
   }
 })
 
-router.post('/signout', authenticateUser, async (req, res, next) => {
+router.post('/signout', authenticateUser, async (_req, res, next) => {
   try {
     const { error } = await supabase.auth.signOut()
 
@@ -85,11 +85,11 @@ router.post('/signout', authenticateUser, async (req, res, next) => {
   }
 })
 
-router.get('/me', authenticateUser, (req: AuthenticatedRequest, res) => {
+router.get('/me', authenticateUser, (req, res) => {
   res.json({
     success: true,
     data: {
-      user: req.user,
+      user: req.user!,
     },
   })
 })

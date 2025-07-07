@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import multer from 'multer'
 import { supabase } from '../config/supabase.js'
-import { authenticateUser, AuthenticatedRequest } from '../middleware/auth.js'
+import { authenticateUser } from '../middleware/auth.js'
 
 const router = Router()
 const upload = multer({ 
@@ -13,12 +13,12 @@ const upload = multer({
 
 router.use(authenticateUser)
 
-router.get('/', async (req: AuthenticatedRequest, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
     const { data, error } = await supabase
       .from('sales_info')
       .select('*')
-      .eq('user_id', req.user.id)
+      .eq('user_id', req.user!.id)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -34,7 +34,7 @@ router.get('/', async (req: AuthenticatedRequest, res, next) => {
   }
 })
 
-router.post('/upload', upload.single('image'), async (req: AuthenticatedRequest, res, next) => {
+router.post('/upload', upload.single('image'), async (req, res, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -43,7 +43,7 @@ router.post('/upload', upload.single('image'), async (req: AuthenticatedRequest,
       })
     }
 
-    const fileName = `${req.user.id}/${Date.now()}.jpg`
+    const fileName = `${req.user!.id}/${Date.now()}.jpg`
     
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('sale-images')
@@ -59,7 +59,7 @@ router.post('/upload', upload.single('image'), async (req: AuthenticatedRequest,
     const { data, error } = await supabase
       .from('sales_info')
       .insert({
-        user_id: req.user.id,
+        user_id: req.user!.id,
         image_url: uploadData.path,
         processing_status: 'uploaded',
       })
@@ -79,7 +79,7 @@ router.post('/upload', upload.single('image'), async (req: AuthenticatedRequest,
   }
 })
 
-router.post('/process', upload.single('image'), async (req: AuthenticatedRequest, res, next) => {
+router.post('/process', upload.single('image'), async (req, res, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -90,7 +90,7 @@ router.post('/process', upload.single('image'), async (req: AuthenticatedRequest
 
     const { saleProcessorService } = await import('../services/sale-processor.service.js')
     
-    const result = await saleProcessorService.processImage(req.file.buffer, req.user.id)
+    const result = await saleProcessorService.processImage(req.file.buffer, req.user!.id)
 
     res.json({
       success: true,
@@ -107,7 +107,7 @@ router.post('/process', upload.single('image'), async (req: AuthenticatedRequest
   }
 })
 
-router.get('/:id/status', async (req: AuthenticatedRequest, res, next) => {
+router.get('/:id/status', async (req, res, next) => {
   try {
     const { id } = req.params
 
@@ -115,7 +115,7 @@ router.get('/:id/status', async (req: AuthenticatedRequest, res, next) => {
       .from('sales_info')
       .select('id, processing_status, processing_method, store_name, items_count, error_message')
       .eq('id', id)
-      .eq('user_id', req.user.id)
+      .eq('user_id', req.user!.id)
       .single()
 
     if (error) {
@@ -138,7 +138,7 @@ router.get('/:id/status', async (req: AuthenticatedRequest, res, next) => {
   }
 })
 
-router.delete('/:id', async (req: AuthenticatedRequest, res, next) => {
+router.delete('/:id', async (req, res, next) => {
   try {
     const { id } = req.params
 
@@ -146,7 +146,7 @@ router.delete('/:id', async (req: AuthenticatedRequest, res, next) => {
       .from('sales_info')
       .delete()
       .eq('id', id)
-      .eq('user_id', req.user.id)
+      .eq('user_id', req.user!.id)
 
     if (error) {
       throw new Error(`Database error: ${error.message}`)

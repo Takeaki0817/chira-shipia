@@ -50,7 +50,7 @@ class SaleProcessorService {
       }
     } catch (error) {
       console.error('Sale processing pipeline failed:', error)
-      throw new Error(`Processing failed: ${error.message}`)
+      throw new Error(`Processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 

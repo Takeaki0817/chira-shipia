@@ -1,17 +1,17 @@
 import { Router } from 'express'
 import { supabase } from '../config/supabase.js'
-import { authenticateUser, AuthenticatedRequest } from '../middleware/auth.js'
+import { authenticateUser } from '../middleware/auth.js'
 
 const router = Router()
 
 router.use(authenticateUser)
 
-router.get('/', async (req: AuthenticatedRequest, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
     const { data, error } = await supabase
       .from('recipes')
       .select('*')
-      .eq('user_id', req.user.id)
+      .eq('user_id', req.user!.id)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -27,7 +27,7 @@ router.get('/', async (req: AuthenticatedRequest, res, next) => {
   }
 })
 
-router.post('/generate', async (req: AuthenticatedRequest, res, next) => {
+router.post('/generate', async (req, res, next) => {
   try {
     const { difficulty, cookingTime, servings, budget, allergies, dietaryRestrictions } = req.body
 
@@ -35,7 +35,7 @@ router.post('/generate', async (req: AuthenticatedRequest, res, next) => {
     const { data: inventory, error: inventoryError } = await supabase
       .from('inventory')
       .select('ingredient_name, quantity, unit, expiry_date')
-      .eq('user_id', req.user.id)
+      .eq('user_id', req.user!.id)
 
     if (inventoryError) {
       throw new Error(`Failed to fetch inventory: ${inventoryError.message}`)
@@ -45,7 +45,7 @@ router.post('/generate', async (req: AuthenticatedRequest, res, next) => {
     const { data: salesData, error: salesError } = await supabase
       .from('sales_info')
       .select('structured_data')
-      .eq('user_id', req.user.id)
+      .eq('user_id', req.user!.id)
       .eq('processing_status', 'structured')
       .gte('sale_period_end', new Date().toISOString().split('T')[0])
 
@@ -75,7 +75,7 @@ router.post('/generate', async (req: AuthenticatedRequest, res, next) => {
     const { data: savedRecipe, error: saveError } = await supabase
       .from('recipes')
       .insert({
-        user_id: req.user.id,
+        user_id: req.user!.id,
         title: recipe.title,
         description: recipe.description,
         ingredients: recipe.ingredients,
@@ -107,7 +107,7 @@ router.post('/generate', async (req: AuthenticatedRequest, res, next) => {
   }
 })
 
-router.get('/:id', async (req: AuthenticatedRequest, res, next) => {
+router.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params
 
@@ -115,7 +115,7 @@ router.get('/:id', async (req: AuthenticatedRequest, res, next) => {
       .from('recipes')
       .select('*')
       .eq('id', id)
-      .eq('user_id', req.user.id)
+      .eq('user_id', req.user!.id)
       .single()
 
     if (error) {
@@ -138,7 +138,7 @@ router.get('/:id', async (req: AuthenticatedRequest, res, next) => {
   }
 })
 
-router.post('/:id/rating', async (req: AuthenticatedRequest, res, next) => {
+router.post('/:id/rating', async (req, res, next) => {
   try {
     const { id } = req.params
     const { rating, notes, modifications, actual_cost, would_cook_again } = req.body
@@ -146,7 +146,7 @@ router.post('/:id/rating', async (req: AuthenticatedRequest, res, next) => {
     const { data, error } = await supabase
       .from('cooking_history')
       .insert({
-        user_id: req.user.id,
+        user_id: req.user!.id,
         recipe_id: id,
         rating: parseInt(rating),
         notes,

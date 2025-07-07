@@ -2,6 +2,17 @@ import { Request, Response, NextFunction } from 'express'
 import { supabase } from '../config/supabase.js'
 import { AppError } from './errorHandler.js'
 
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id: string
+        email: string
+      }
+    }
+  }
+}
+
 export interface AuthenticatedRequest extends Request {
   user: {
     id: string
@@ -11,7 +22,7 @@ export interface AuthenticatedRequest extends Request {
 
 export async function authenticateUser(
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) {
   try {

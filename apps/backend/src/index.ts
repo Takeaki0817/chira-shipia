@@ -19,7 +19,11 @@ const PORT = process.env.PORT || 3001
 
 app.use(helmet())
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',                    // ローカル開発環境
+    'https://smart-recipe-frontend.vercel.app', // Vercel本番環境
+    process.env.CORS_ORIGIN || 'http://localhost:3000'
+  ].filter(Boolean),
   credentials: true,
 }))
 app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }))

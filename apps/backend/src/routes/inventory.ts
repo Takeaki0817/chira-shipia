@@ -1,18 +1,18 @@
 import { Router } from 'express'
 import { supabase } from '../config/supabase.js'
-import { authenticateUser, AuthenticatedRequest } from '../middleware/auth.js'
+import { authenticateUser } from '../middleware/auth.js'
 import { ValidationError } from '../middleware/errorHandler.js'
 
 const router = Router()
 
 router.use(authenticateUser)
 
-router.get('/', async (req: AuthenticatedRequest, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
     const { data, error } = await supabase
       .from('inventory')
       .select('*')
-      .eq('user_id', req.user.id)
+      .eq('user_id', req.user!.id)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -28,7 +28,7 @@ router.get('/', async (req: AuthenticatedRequest, res, next) => {
   }
 })
 
-router.post('/', async (req: AuthenticatedRequest, res, next) => {
+router.post('/', async (req, res, next) => {
   try {
     const { ingredient_name, quantity, unit, expiry_date, category, notes } = req.body
 
@@ -39,7 +39,7 @@ router.post('/', async (req: AuthenticatedRequest, res, next) => {
     const { data, error } = await supabase
       .from('inventory')
       .insert({
-        user_id: req.user.id,
+        user_id: req.user!.id,
         ingredient_name,
         quantity: parseFloat(quantity),
         unit: unit || 'pieces',
@@ -63,7 +63,7 @@ router.post('/', async (req: AuthenticatedRequest, res, next) => {
   }
 })
 
-router.put('/:id', async (req: AuthenticatedRequest, res, next) => {
+router.put('/:id', async (req, res, next) => {
   try {
     const { id } = req.params
     const { ingredient_name, quantity, unit, expiry_date, category, notes } = req.body
@@ -80,7 +80,7 @@ router.put('/:id', async (req: AuthenticatedRequest, res, next) => {
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .eq('user_id', req.user.id)
+      .eq('user_id', req.user!.id)
       .select()
       .single()
 
@@ -104,7 +104,7 @@ router.put('/:id', async (req: AuthenticatedRequest, res, next) => {
   }
 })
 
-router.delete('/:id', async (req: AuthenticatedRequest, res, next) => {
+router.delete('/:id', async (req, res, next) => {
   try {
     const { id } = req.params
 
@@ -112,7 +112,7 @@ router.delete('/:id', async (req: AuthenticatedRequest, res, next) => {
       .from('inventory')
       .delete()
       .eq('id', id)
-      .eq('user_id', req.user.id)
+      .eq('user_id', req.user!.id)
 
     if (error) {
       throw new Error(`Database error: ${error.message}`)
@@ -127,7 +127,7 @@ router.delete('/:id', async (req: AuthenticatedRequest, res, next) => {
   }
 })
 
-router.get('/expiring', async (req: AuthenticatedRequest, res, next) => {
+router.get('/expiring', async (req, res, next) => {
   try {
     const daysAhead = parseInt(req.query.days as string) || 7
     const expiryThreshold = new Date()
@@ -136,7 +136,7 @@ router.get('/expiring', async (req: AuthenticatedRequest, res, next) => {
     const { data, error } = await supabase
       .from('inventory')
       .select('*')
-      .eq('user_id', req.user.id)
+      .eq('user_id', req.user!.id)
       .lte('expiry_date', expiryThreshold.toISOString().split('T')[0])
       .order('expiry_date', { ascending: true })
 

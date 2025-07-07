@@ -36,13 +36,6 @@ interface SaleStructureData {
   groups?: SaleGroup[] // 新しいグルーピング形式
 }
 
-interface NewSaleFormat {
-  store_name: string
-  sale_period: { start: string; end: string }
-  layout_analysis?: string
-  hierarchy_structure?: string
-  groups: SaleGroup[]
-}
 
 class GeminiService {
   private genAI: GoogleGenerativeAI

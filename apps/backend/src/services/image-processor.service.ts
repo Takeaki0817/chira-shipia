@@ -10,7 +10,6 @@ class ImageProcessorService {
         .sharpen({ sigma: 1.2, m1: 1.0, m2: 0.3 }) // Enhanced sharpening for text and borders
         .modulate({ 
           brightness: 1.05,  // Slight brightness increase
-          contrast: 1.3,     // Higher contrast for better text/background separation
           saturation: 0.9    // Reduce saturation to focus on text
         })
         .linear(1.1, -(128 * 0.1)) // Gamma correction for better text clarity
@@ -55,8 +54,7 @@ class ImageProcessorService {
         })
         .normalize()
         .modulate({ 
-          brightness: 1.2,
-          contrast: 2.0 // 境界線のコントラストを大幅強化
+          brightness: 1.2
         })
         .sharpen({ sigma: 1.5, m1: 2.0, m2: 0.5 })
         .jpeg({ quality: 98 })
