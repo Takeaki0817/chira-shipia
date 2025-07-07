@@ -8,7 +8,11 @@
     "build": "echo 'No build needed for TypeScript definitions'",
     "typecheck": "tsc --noEmit",
     "lint": "echo 'No linting needed for TypeScript definitions'",
-    "lint:fix": "echo 'No linting needed for TypeScript definitions'"
+    "lint:fix": "echo 'No linting needed for TypeScript definitions'",
+    "test": "echo 'No tests needed for TypeScript definitions'",
+    "test:unit": "echo 'No tests needed for TypeScript definitions'",
+    "test:watch": "echo 'No tests needed for TypeScript definitions'",
+    "test:coverage": "echo 'No tests needed for TypeScript definitions'"
   },
   "devDependencies": {
     "typescript": "^5.3.0"
