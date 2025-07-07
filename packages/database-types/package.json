@@ -6,7 +6,9 @@
   "types": "supabase.ts",
   "scripts": {
     "build": "echo 'No build needed for TypeScript definitions'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "echo 'No linting needed for TypeScript definitions'",
+    "lint:fix": "echo 'No linting needed for TypeScript definitions'"
   },
   "devDependencies": {
     "typescript": "^5.3.0"
