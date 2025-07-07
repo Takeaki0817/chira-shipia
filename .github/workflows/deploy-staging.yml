@@ -3,12 +3,15 @@ name: Deploy to Staging
 on:
   push:
     branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
   workflow_dispatch:
 
 jobs:
-  deploy-staging:
+  validate-and-deploy-staging:
     runs-on: ubuntu-latest
     environment: staging
+    timeout-minutes: 15
     
     steps:
     - name: Checkout code
@@ -23,8 +26,23 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Lint and typecheck
+      run: |
+        npm run lint
+        npm run typecheck
+
     - name: Build applications
       run: npm run build
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GOOGLE_CLOUD_PROJECT_ID: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+
+    - name: Run tests
+      run: npm run test:unit
 
     - name: Deploy to Vercel Preview
       uses: amondnet/vercel-action@v25
@@ -32,8 +50,7 @@ jobs:
         vercel-token: ${{ secrets.VERCEL_TOKEN }}
         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        working-directory: ./apps/frontend
-        vercel-args: '--prebuilt'
+        scope: ${{ secrets.VERCEL_ORG_ID }}
 
     - name: Comment PR with preview URL
       if: github.event_name == 'pull_request'
@@ -44,5 +61,5 @@ jobs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: '🚀 Preview deployment ready! Check it out at the Vercel preview URL.'
+            body: '🚀 Staging deployment ready! Preview has been deployed to Vercel.'
           })
