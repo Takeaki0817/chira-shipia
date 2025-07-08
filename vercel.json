@@ -9,6 +9,10 @@
     {
       "source": "/api/(.*)",
       "destination": "https://smart-recipe-backend.onrender.com/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [

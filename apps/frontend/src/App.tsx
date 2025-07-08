@@ -39,9 +39,9 @@ function App() {
           element={isAuthenticated ? <Layout /> : <Navigate to="/auth" replace />}
         >
           <Route index element={<HomePage />} />
-          <Route path="/inventory" element={<InventoryPage />} />
-          <Route path="/sales" element={<SalesPage />} />
-          <Route path="/recipes" element={<RecipesPage />} />
+          <Route path="inventory" element={<InventoryPage />} />
+          <Route path="sales" element={<SalesPage />} />
+          <Route path="recipes" element={<RecipesPage />} />
         </Route>
       </Routes>
       <Toaster />

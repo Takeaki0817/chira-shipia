@@ -20,10 +20,14 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    port: 3000,
+  },
   build: {
     outDir: 'dist',
     sourcemap: true,
   },
+  // @ts-ignore
   test: {
     globals: true,
     environment: 'jsdom',
